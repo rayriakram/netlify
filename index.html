@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gure Wind | Netherlands Forecast</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F5F5F5] text-[#1A1A1A] antialiased overflow-hidden selection:bg-[#4A90E2] selection:text-white h-screen w-screen">
+
+    <!-- Background Texture -->
+    <div class="fixed inset-0 z-[-1] opacity-[0.06] pointer-events-none" 
+         style="background-image: url('https://r2.flowith.net/files/jpeg/OQIUG-dutch_polder_weather_background_index_1@1024x1024.jpeg'); background-size: cover; background-position: center;">
+    </div>
+
+    <main class="w-full h-full md:grid md:grid-cols-2 relative">
+        
+        <!-- LEFT PANEL: Dashboard -->
+        <section class="relative p-6 flex flex-col h-full overflow-y-auto no-scrollbar z-10 md:border-r border-gray-200/50">
+            
+            <!-- Top Bar -->
+            <header class="flex justify-between items-center mb-8 animate-fade-in shrink-0">
+                <div class="flex items-center space-x-2 group cursor-pointer">
+                    <div class="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-all">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-[#FF6B00]"></i>
+                    </div>
+                    <select id="city-selector" class="bg-transparent font-mono text-sm font-bold uppercase tracking-wide border-none outline-none cursor-pointer focus:ring-0 text-[#1A1A1A] appearance-none pr-4">
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+                <div class="font-mono text-xs text-gray-400 bg-white/50 px-2 py-1 rounded-md backdrop-blur" id="current-time">00:00</div>
+            </header>
+
+            <!-- Hero Section -->
+            <div class="flex-grow flex flex-col justify-center mb-8 animate-slide-up min-h-[300px]">
+                <div id="weather-icon-container" class="mb-4 text-[#4A90E2] transition-transform hover:scale-105 duration-500">
+                    <i data-lucide="cloud" class="w-20 h-20 stroke-[1.5]"></i>
+                </div>
+                
+                <div class="flex items-baseline space-x-4 mb-6">
+                    <h1 id="current-temp" class="text-[7rem] leading-none font-[800] tracking-tighter text-[#1A1A1A]">-°</h1>
+                    <span id="current-condition" class="text-lg text-gray-500 font-medium lowercase font-mono">loading</span>
+                </div>
+
+                <div class="relative pl-6 py-2 border-l-4 border-[#FF6B00]">
+                    <p id="narrative-text" class="text-xl md:text-2xl font-[600] leading-tight text-[#1A1A1A] max-w-md">
+                        Calibrating wind sensors...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-3 gap-3 mb-8 font-mono text-xs text-gray-600 animate-fade-in delay-100 shrink-0">
+                <div class="glass-card p-4 rounded-xl flex flex-col items-start">
+                    <i data-lucide="wind" class="w-4 h-4 text-gray-400 mb-2"></i>
+                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1">Gusts</span>
+                    <span id="wind-speed" class="text-lg font-bold text-[#1A1A1A]">-</span>
+                    <span class="block text-[10px]" id="wind-dir">-</span>
+                </div>
+                <div class="glass-card p-4 rounded-xl flex flex-col items-start">
+                    <i data-lucide="umbrella" class="w-4 h-4 text-[#4A90E2] mb-2"></i>
+                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1">Rain</span>
+                    <span id="rain-chance" class="text-lg font-bold text-[#1A1A1A]">-</span>
+                    <span class="block text-[10px]">Prob.</span>
+                </div>
+                <div class="glass-card p-4 rounded-xl flex flex-col items-start">
+                    <i data-lucide="droplet" class="w-4 h-4 text-gray-400 mb-2"></i>
+                    <span class="block text-[10px] uppercase tracking-wider text-gray-400 mb-1">Feel</span>
+                    <span id="feels-like" class="text-lg font-bold text-[#1A1A1A]">-</span>
+                    <span class="block text-[10px]">RealFeel</span>
+                </div>
+            </div>
+
+            <!-- 7-Day Forecast Scroller -->
+            <div class="mb-24 md:mb-0 animate-fade-in delay-200 shrink-0">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="font-mono text-xs font-bold text-gray-400 uppercase tracking-wider">The Coming Week</h3>
+                    <span class="text-[10px] text-gray-400 font-mono">KNMI/Open-Meteo</span>
+                </div>
+                <div id="forecast-container" class="flex overflow-x-auto space-x-3 pb-4 -mx-6 px-6 md:mx-0 md:px-0 no-scrollbar snap-x snap-mandatory">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+            
+            <!-- Mobile Map Toggle (Fixed Bottom) -->
+            <div class="md:hidden fixed bottom-6 left-6 right-6 z-40">
+                <button id="toggle-map-btn" class="w-full bg-[#1A1A1A] text-white font-mono text-sm py-4 rounded-xl shadow-2xl active:scale-95 transition-all flex items-center justify-center space-x-3 border border-gray-800">
+                    <i data-lucide="map" class="w-4 h-4"></i>
+                    <span class="tracking-wide font-bold">RADAR & MAP</span>
+                </button>
+            </div>
+
+            <footer class="hidden md:block mt-8 text-[10px] text-gray-400 font-mono">
+                Design: Gure Wind • Data: Open-Meteo
+            </footer>
+        </section>
+
+        <!-- RIGHT PANEL: Map -->
+        <section id="map-section" class="fixed inset-0 z-50 translate-y-[110%] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] md:relative md:translate-y-0 md:inset-auto md:block bg-gray-200 h-full">
+            <div id="map" class="w-full h-full z-0 outline-none"></div>
+            
+            <!-- Mobile Close Map Button -->
+            <button id="close-map-btn" class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white text-[#1A1A1A] px-6 py-3 rounded-full shadow-xl font-mono text-xs font-bold flex items-center space-x-2 md:hidden z-[1000] hover:bg-gray-50 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>CLOSE VIEW</span>
+            </button>
+
+            <!-- Map Overlay Controls -->
+            <div class="absolute top-4 left-4 md:left-auto md:right-4 bg-white/90 backdrop-blur p-3 rounded-lg shadow-sm z-[1000] border border-gray-100">
+                <div class="flex items-center space-x-3 font-mono text-[10px] uppercase tracking-wide text-gray-600">
+                    <div class="flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-[#FF6B00]"></span><span>City</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-[#4A90E2]/50 border border-[#4A90E2]"></span><span>Rain</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Modules -->
+    <script type="module" src="main.js"></script>
+
+</body>
+</html>

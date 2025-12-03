@@ -1,0 +1,141 @@
+/* Base settings */
+:root {
+    --color-canvas: #F5F5F5;
+    --color-ink: #1A1A1A;
+    --color-accent: #FF6B00;
+    --color-water: #4A90E2;
+}
+
+body {
+    font-family: 'Inter Tight', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--color-canvas);
+}
+
+/* Typography Overrides */
+h1, h2, h3 {
+    letter-spacing: -0.03em;
+}
+
+/* Utility: Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+}
+
+/* Animations */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+
+/* Leaflet Customization */
+.leaflet-container {
+    background: #d4dadc; /* Matches CartoDB Water color roughly */
+    font-family: 'Roboto Mono', monospace;
+}
+
+/* Custom Marker CSS */
+.custom-marker {
+    background: transparent;
+}
+
+.marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    background: #ffffff;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 2px solid var(--color-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.marker-pin::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    margin: 6px 0 0 6px; /* Adjust center because of rotation */
+    background: var(--color-ink);
+    position: absolute;
+    border-radius: 50%;
+}
+
+.marker-pin.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    z-index: 100;
+    transform: rotate(-45deg) scale(1.1);
+}
+.marker-pin.active::after {
+    background: white;
+}
+
+.marker-temp {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.95);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    pointer-events: none;
+}
+
+/* Snap Scroll fix for horizontal list */
+.snap-x {
+    scroll-snap-type: x mandatory;
+}
+.snap-start {
+    scroll-snap-align: start;
+}
+
+/* Select customization */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 1em;
+}
